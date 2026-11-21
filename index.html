@@ -49,6 +49,11 @@
   input[type=text]::placeholder, textarea::placeholder { color: rgba(11,31,77,.4); }
   input[type=text]:focus, textarea:focus { outline: 2px solid var(--gold); outline-offset: 1px; }
   input[type=text] + input[type=text] { margin-top: 6px; }
+  .size-select {
+    font: inherit; color: var(--navy); padding: 8px 10px; min-width: 180px;
+    border: 1px solid rgba(11,31,77,.25); border-radius: 8px; background: var(--cream);
+  }
+  .size-select:focus { outline: 2px solid var(--gold); outline-offset: 1px; }
 
   .btn {
     font: inherit; font-weight: 700; cursor: pointer; border-radius: 8px; padding: 9px 14px;
@@ -195,6 +200,13 @@
   /* 제목 카드: 소제목을 큰 제목으로 → 짧은 줄 최대 2개 */
   .content .card-title { font-size: 84px; font-weight: 800; line-height: 1.25; letter-spacing: -0.035em; margin-top: 28px; }
   /* 글이 많으면 한 단계씩 줄인다 (가장 작은 글자도 40px 이상) */
+  /* 글자 크기 '크게': 한 단계 키운다 */
+  .content .content-inner.fit-up .card-key.size-xl { font-size: 176px; }
+  .content .content-inner.fit-up .card-key.size-l  { font-size: 128px; }
+  .content .content-inner.fit-up .card-key.size-m  { font-size: 92px; }
+  .content .content-inner.fit-up .card-title { font-size: 100px; }
+  .content .content-inner.fit-up .card-label { font-size: 58px; }
+  .content .content-inner.fit-up .card-desc, .content .content-inner.fit-up .bullet { font-size: 52px; }
   .content .content-inner.fit-1 .card-key.size-xl { font-size: 124px; }
   .content .content-inner.fit-1 .card-key.size-l  { font-size: 96px; }
   .content .content-inner.fit-1 .card-key.size-m  { font-size: 72px; }
@@ -233,6 +245,47 @@
   }
   .closing .closing-line1 { font-size: 60px; font-weight: 800; line-height: 1.35; }
   .closing .closing-line2 { font-size: 44px; font-weight: 600; margin-top: 40px; padding-top: 28px; border-top: 4px solid var(--gold); color: var(--gold); }
+
+  /* ───────── 심플형 디자인 (.card.simple) ─────────
+     흰 단색 바탕, 금색 테두리·워터마크·가장자리 띠 없음, 큰 굵은 글씨, 넉넉한 여백.
+     로고는 오른쪽 아래 모서리의 작은 글자형 로고 하나만(흰 상자·금테 없음). 강조색은 금색 한 가지. */
+  .card.simple { background: var(--white); color: var(--navy); }
+  .card.simple .example-badge { background: var(--white); }
+  .logo.mini { right: 70px; bottom: 70px; z-index: 4; width: auto; height: auto; max-width: 150px; max-height: 50px; }
+  .logo-guide.mini { right: 70px; bottom: 70px; height: 70px; padding: 0 24px; border-radius: 10px; }
+  .cover.simple .cover-main { left: 110px; right: 110px; top: 150px; bottom: 170px; }
+  .cover.simple .cover-title { font-size: 108px; font-weight: 800; line-height: 1.18; }
+  .cover.simple .rule { margin: 56px 0; }
+  .cover.simple .cover-sub { font-size: 52px; font-weight: 600; }
+  .content.simple .content-inner { left: 120px; right: 120px; }
+  .content.simple .card-title { font-size: 96px; line-height: 1.2; margin-top: 36px; }
+  .content.simple .card-label { font-size: 56px; font-weight: 800; margin-top: 24px; }
+  .content.simple .card-desc, .content.simple .bullet { font-size: 48px; font-weight: 600; }
+  .content.simple .key-rule { margin: 52px 0 44px; }
+  .content.simple .content-inner.fit-1 .key-rule { margin: 36px 0 30px; }
+  .content.simple .content-inner.fit-2 .card-desc, .content.simple .content-inner.fit-2 .bullet { font-size: 42px; }
+  .content.simple .content-inner.fit-2 .card-label { font-size: 48px; }
+  .content.simple .content-inner.fit-2 .key-rule { margin: 28px 0 24px; }
+  .content.simple .content-inner.fit-3 .card-desc, .content.simple .content-inner.fit-3 .bullet { font-size: 40px; }
+  .content.simple .content-inner.fit-3 .card-label { font-size: 42px; }
+  .content.simple .content-inner.fit-3 .key-rule { margin: 22px 0 20px; }
+  .content.simple .content-inner.fit-up .card-title { font-size: 112px; }
+  .content.simple .content-inner.fit-up .card-label { font-size: 62px; }
+  .content.simple .content-inner.fit-up .card-desc, .content.simple .content-inner.fit-up .bullet { font-size: 54px; }
+  .closing.simple .closing-inner { padding: 110px 110px 170px; }
+  .closing.simple .closing-line1 { font-size: 68px; color: var(--navy); }
+  .closing.simple .closing-line2 { font-size: 48px; font-weight: 700; }
+
+  /* 디자인 고르기 (맨 위) */
+  .design-switch { display: flex; align-items: center; gap: 8px; }
+  .design-switch .label { font-size: 13px; font-weight: 700; }
+  .design-switch .seg { display: inline-flex; border: 1.5px solid var(--navy); border-radius: 999px; overflow: hidden; }
+  .design-switch button {
+    font: inherit; font-size: 14px; font-weight: 700; padding: 7px 16px; cursor: pointer;
+    border: 0; background: transparent; color: var(--navy);
+  }
+  .design-switch button[aria-checked="true"] { background: var(--navy); color: var(--cream); }
+  .design-switch button:focus-visible { outline: 2px solid var(--gold); outline-offset: -3px; }
 </style>
 </head>
 <body>
@@ -240,6 +293,13 @@
 <header>
   <div class="head-row">
     <h1 id="app-name"></h1>
+    <div class="design-switch">
+      <span class="label" id="design-label">카드 디자인</span>
+      <div class="seg" role="radiogroup" aria-labelledby="design-label">
+        <button type="button" role="radio" data-design="brand">브랜드형</button>
+        <button type="button" role="radio" data-design="simple">심플형</button>
+      </div>
+    </div>
     <a id="blog-link" class="blog-link" hidden>← 블로그 앱으로 돌아가기</a>
   </div>
   <p class="head-note">로고는 내 브라우저에만 저장돼요.</p>
@@ -386,7 +446,10 @@ const EMPTY = () => ({
   closing: [...DEFAULT_CLOSING],
 });
 // sub: 숫자 카드에서는 숫자 아래 설명 한 줄, 제목 카드에서는 큰 제목 / key: 큰 숫자 / lines: 짧은 줄 최대 3개
-function newContent() { return { sub: '', key: '', lines: ['', '', ''], noWatermark: false }; }
+// textSize: 글자 크기 — 'auto'(글 양에 맞춰 자동으로 줄임) / 'small'(작게) / 'large'(크게)
+function newContent() { return { sub: '', key: '', lines: ['', '', ''], noWatermark: false, textSize: 'auto' }; }
+const TEXT_SIZES = [['auto', '자동 (글 양에 맞춤)'], ['small', '작게'], ['large', '크게']];
+const sizeOf = (c) => (TEXT_SIZES.some(([v]) => v === c.textSize) ? c.textSize : 'auto');
 
 /* ═════════ 로고 저장소 (localStorage, 항상 try/catch) ═════════ */
 const LOGO_KEY = { circle: 'acecard.logo.circle', word: 'acecard.logo.word' };
@@ -399,6 +462,12 @@ function storeSet(k, v) {
   try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); return true; }
   catch (e) { return false; }
 }
+
+/* ═════════ 카드 디자인: 브랜드형(기본) / 심플형 — 이 브라우저에 저장 ═════════ */
+const DESIGN_KEY = 'acecard.design';
+const DESIGNS = ['brand', 'simple'];
+let design = DESIGNS.includes(storeGet(DESIGN_KEY)) ? storeGet(DESIGN_KEY) : 'brand';
+const isSimple = () => design === 'simple';
 
 /* ═════════ 상태 ═════════ */
 let state = EMPTY();
@@ -455,6 +524,7 @@ const charCount = (c) => [c.sub, c.key, ...(c.lines || [])].join('').replace(/\s
 const isLong = (c) => charCount(c) > LONG_TEXT;
 const hasWatermark = (c) => !!logos.word && !c.noWatermark && !isLong(c);
 function watermarkState(c) {
+  if (isSimple()) return '없음 (심플형)';
   if (!logos.word) return '글자형 로고 없음';
   if (c.noWatermark) return '꺼짐';
   if (isLong(c)) return '꺼짐 (글이 많음)';
@@ -478,7 +548,9 @@ function logoOrGuide(kind, src, guideText = LOGO_GUIDE) {
   return g;
 }
 // 오른쪽 아래: 흰 바탕 둥근 사각형 안에 글자형 로고
+// 심플형: 오른쪽 아래 모서리에 작은 글자형 로고만 (상자·테두리 없음)
 function cornerBadge() {
+  if (isSimple()) return logoOrGuide('mini', logos.word);
   if (!logos.word) return logoOrGuide('corner', null);
   const b = el('div', 'logo-badge');
   const i = new Image(); i.src = logos.word; i.alt = '';
@@ -491,8 +563,8 @@ function decorate(card, { corner = true } = {}) {
 }
 
 function buildCover() {
-  const c = el('div', 'card cover');
-  c.append(el('div', 'edge-bar'), logoOrGuide('wordmark', logos.word));
+  const c = el('div', `card cover${isSimple() ? ' simple' : ''}`);
+  if (!isSimple()) c.append(el('div', 'edge-bar'), logoOrGuide('wordmark', logos.word));   // 심플형: 띠·왼쪽 위 로고 없음
   const main = el('div', 'cover-main');
   main.append(textEl('cover-title', state.cover.title, PH.coverTitle), el('div', 'rule'), textEl('cover-sub', state.cover.subtitle, PH.coverSub));
   c.append(main);
@@ -501,9 +573,10 @@ function buildCover() {
 }
 
 function buildContent(item, i) {
-  const c = el('div', 'card content');
-  c.append(el('div', 'gold-frame'));
-  if (hasWatermark(item)) {                     // 직접 껐거나 글이 많으면 없음
+  const c = el('div', `card content${isSimple() ? ' simple' : ''}`);
+  c.dataset.size = sizeOf(item);                // 글자 크기 선택 (layoutCard에서 씀)
+  if (!isSimple()) c.append(el('div', 'gold-frame'));   // 심플형: 금색 테두리·워터마크 없음
+  if (!isSimple() && hasWatermark(item)) {      // 직접 껐거나 글이 많으면 없음
     const w = el('div', 'watermark');
     const i = new Image(); i.src = logos.word; i.alt = '';
     w.append(i);
@@ -543,10 +616,14 @@ const LOGO_RESERVE = 150, LOGO_EDGE = 70, LOGO_GAP = 16;
 function layoutCard(card) {
   const inner = card && card.querySelector('.content-inner');
   if (!inner) return;
-  const badge = card.querySelector('.logo-badge, .logo-guide.corner');
+  const badge = card.querySelector('.logo-badge, .logo-guide.corner, .logo.mini, .logo-guide.mini');
   const h = badge ? badge.offsetHeight : 0;
   inner.style.bottom = `${Math.max(LOGO_RESERVE, h ? LOGO_EDGE + h + LOGO_GAP : 0)}px`;
-  for (let lv = 0; lv <= 3; lv++) {
+  // 글자 크기: 자동은 보통 크기에서 시작해 넘치면 줄이고, 작게는 2단계부터, 크게는 한 단계 키운 채로 둔다(넘치면 경고).
+  const size = card.dataset.size || 'auto';
+  inner.classList.remove('fit-up', 'fit-1', 'fit-2', 'fit-3');
+  if (size === 'large') { inner.classList.add('fit-up'); return; }
+  for (let lv = size === 'small' ? 2 : 0; lv <= 3; lv++) {
     inner.classList.remove('fit-1', 'fit-2', 'fit-3');
     if (lv) inner.classList.add(`fit-${lv}`);
     if (inner.scrollHeight <= inner.clientHeight + 1) break;
@@ -555,6 +632,18 @@ function layoutCard(card) {
 function layoutAll() { previewCards.forEach(layoutCard); }
 
 function buildClosing() {
+  if (isSimple()) {
+    // 심플형 마지막 장: 흰 바탕, 네이비 문구, 금색 이름·줄. 로고는 모서리 작은 로고 하나.
+    const c = el('div', 'card closing simple');
+    const inner = el('div', 'closing-inner');
+    inner.append(
+      textEl('closing-line1', state.closing[0], DEFAULT_CLOSING[0]),
+      textEl('closing-line2', state.closing[1], DEFAULT_CLOSING[1]),
+    );
+    c.append(inner);
+    decorate(c);
+    return c;
+  }
   const c = el('div', 'card closing');
   c.append(el('div', 'edge-top'), el('div', 'edge-bottom'));
   const inner = el('div', 'closing-inner');
@@ -597,7 +686,7 @@ function renderPreview() {
     slot.append(head, frame);
     box.append(slot);
     // 로고 그림이 늦게 읽히면 로고 상자 높이가 바뀌므로 다시 맞춘다
-    node.querySelectorAll('.logo-badge img').forEach((im) => {
+    node.querySelectorAll('.logo-badge img, img.logo.mini').forEach((im) => {
       if (!im.complete) im.addEventListener('load', () => { layoutCard(node); renderWarnings(); }, { once: true });
     });
   });
@@ -653,7 +742,9 @@ function renderWarnings() {
   });
   const contentInners = [...document.querySelectorAll('#preview .content-inner')];
   contentInners.forEach((n, i) => {
-    if (n.scrollHeight > n.clientHeight + 2) list.push(`내용 ${i + 1}: 글이 카드 밖으로 넘칩니다. 줄여 주세요.`);
+    if (n.scrollHeight <= n.clientHeight + 2) return;
+    const big = state.contents[i] && sizeOf(state.contents[i]) === 'large';
+    list.push(`내용 ${i + 1}: 글이 카드 밖으로 넘칩니다. ${big ? '글자 크기를 ‘자동’으로 바꾸거나 글을 줄여 주세요.' : '줄여 주세요.'}`);
   });
   const cover = document.querySelector('#preview .cover-main');
   if (cover && cover.scrollHeight > cover.clientHeight + 2) list.push('표지: 제목이 너무 길어 넘칩니다. 줄여 주세요.');
@@ -707,6 +798,13 @@ function renderContentEditor() {
     lintDesc();
 
     // 카드마다 워터마크 끄기
+    // 카드마다 글자 크기 (가장 작은 글자도 40px 이상)
+    const sizeLabel = el('label', 'field', '글자 크기'); sizeLabel.htmlFor = `c${i}-size`;
+    const sizeSel = el('select', 'size-select'); sizeSel.id = `c${i}-size`;
+    TEXT_SIZES.forEach(([v, t]) => { const o = el('option', '', t); o.value = v; sizeSel.append(o); });
+    sizeSel.value = sizeOf(item);
+    sizeSel.onchange = () => { item.textSize = sizeSel.value; changed(); };
+
     const wmLabel = el('label', 'check');
     const wm = el('input'); wm.type = 'checkbox'; wm.checked = !!item.noWatermark;
     wm.onchange = () => { item.noWatermark = wm.checked; updateInfo(); changed(); };
@@ -716,7 +814,7 @@ function renderContentEditor() {
       head,
       field('소제목 (숫자 카드: 숫자 아래 설명 한 줄 · 제목 카드: 큰 제목)', `c${i}-sub`, item.sub, '예: 안암동 아파트 평균 매매가', upd('sub')),
       field('큰 숫자 (단위까지, 예: 58% · 비우면 제목 카드)', `c${i}-key`, item.key, '예: 8억 2천만 원', upd('key')),
-      descLabel, ...lineInputs, dLint, wmLabel, info,
+      descLabel, ...lineInputs, dLint, sizeLabel, sizeSel, wmLabel, info,
     );
     updateInfo();
     list.append(wrap);
@@ -1382,6 +1480,33 @@ window.addEventListener('hashchange', () => {
 document.title = APP_NAME;
 $('app-name').textContent = APP_NAME;
 if (BLOG_URL) { $('blog-link').href = BLOG_URL; $('blog-link').hidden = false; }
+
+// 카드 디자인 고르기: 누르면 바로 미리보기에 반영하고 이 브라우저에 저장(실패해도 그대로 동작)
+const designButtons = [...document.querySelectorAll('.design-switch [data-design]')];
+function showDesign() {
+  designButtons.forEach((b) => {
+    const on = b.dataset.design === design;
+    b.setAttribute('aria-checked', String(on));
+    b.tabIndex = on ? 0 : -1;
+  });
+}
+function setDesign(d) {
+  if (!DESIGNS.includes(d) || d === design) return;
+  design = d;
+  storeSet(DESIGN_KEY, d);
+  showDesign();
+  changed(true);   // 입력칸의 워터마크 안내도 함께 갱신
+}
+designButtons.forEach((b, i) => {
+  b.onclick = () => setDesign(b.dataset.design);
+  b.onkeydown = (e) => {   // 좌우 화살표로도 고를 수 있게
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    e.preventDefault();
+    const next = designButtons[(i + (e.key === 'ArrowRight' ? 1 : designButtons.length - 1)) % designButtons.length];
+    setDesign(next.dataset.design); next.focus();
+  };
+});
+showDesign();
 const fromBlog = takeBlogData();
 if (fromBlog) { state = fromBlog; showImportNote(true); }
 fillStaticFields();
