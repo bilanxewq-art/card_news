@@ -1,0 +1,1395 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title></title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<style>
+  :root {
+    --cream: #FBF6EC;
+    --navy: #0B1F4D;
+    --gold: #C9A24A;
+    --white: #FFFFFF; /* 오른쪽 아래 로고 바탕, 마지막 장 글자 */
+    --warn: #FFE066; /* 금지어 경고용 — 입력 화면에서만 쓰고 카드에는 쓰지 않음 */
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--cream);
+    color: var(--navy);
+    font-family: 'Pretendard', -apple-system, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+    font-size: 15px;
+  }
+
+  /* ───────── 앱 화면 ───────── */
+  header { padding: 14px 24px; border-bottom: 2px solid var(--gold); }
+  header h1 { margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -0.02em; }
+  header .head-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  header .head-note { font-size: 13px; opacity: .75; margin: 4px 0 0; }
+  header .blog-link { font-size: 14px; font-weight: 600; color: var(--navy); text-decoration: underline; text-decoration-color: var(--gold); text-underline-offset: 4px; }
+
+  .layout { display: grid; grid-template-columns: minmax(320px, 420px) 1fr; gap: 28px; padding: 24px; align-items: start; }
+  @media (max-width: 860px) {
+    .layout { grid-template-columns: 1fr; padding: 16px; gap: 20px; }
+    header { padding: 12px 16px; }
+  }
+
+  .panel { display: flex; flex-direction: column; gap: 16px; }
+  .box { border: 1px solid rgba(11,31,77,.18); border-radius: 12px; padding: 16px; background: #fff; }
+  .box h2 { margin: 0 0 4px; font-size: 16px; font-weight: 800; display: flex; align-items: baseline; gap: 6px; }
+  .box h2 small { font-weight: 500; font-size: 13px; opacity: .6; }
+  label.field { display: block; font-size: 13px; font-weight: 600; margin: 12px 0 4px; }
+  input[type=text], textarea {
+    width: 100%; font: inherit; color: var(--navy); padding: 9px 11px;
+    border: 1px solid rgba(11,31,77,.25); border-radius: 8px; background: var(--cream);
+  }
+  textarea { resize: vertical; line-height: 1.5; }
+  input[type=text]::placeholder, textarea::placeholder { color: rgba(11,31,77,.4); }
+  input[type=text]:focus, textarea:focus { outline: 2px solid var(--gold); outline-offset: 1px; }
+  input[type=text] + input[type=text] { margin-top: 6px; }
+
+  .btn {
+    font: inherit; font-weight: 700; cursor: pointer; border-radius: 8px; padding: 9px 14px;
+    border: 1.5px solid var(--navy); background: var(--navy); color: var(--cream);
+  }
+  .btn.ghost { background: transparent; color: var(--navy); }
+  .btn.small { padding: 5px 10px; font-size: 13px; }
+  .btn:disabled { opacity: .35; cursor: not-allowed; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .hint { font-size: 12.5px; opacity: .7; line-height: 1.5; margin: 6px 0 0; }
+
+  .content-item { border-top: 1px solid rgba(11,31,77,.12); padding-top: 14px; margin-top: 14px; }
+  .content-item:first-child { border-top: 0; margin-top: 8px; padding-top: 0; }
+  .content-item .head { display: flex; justify-content: space-between; align-items: center; }
+  .content-item .head b { font-size: 14px; }
+  .item-info { font-size: 12px; opacity: .65; margin-top: 6px; }
+  .content-item .check { margin-top: 10px; font-size: 13.5px; }
+
+  .logo-slot { display: flex; gap: 12px; align-items: flex-start; padding: 12px 0 0; margin-top: 12px; border-top: 1px dashed rgba(11,31,77,.15); }
+  .logo-thumb {
+    width: 64px; height: 64px; flex: none; border: 1px dashed rgba(11,31,77,.3); border-radius: 8px;
+    display: grid; place-items: center; background: var(--cream); overflow: hidden; font-size: 12px; color: rgba(11,31,77,.5);
+  }
+  .logo-thumb img { max-width: 100%; max-height: 100%; }
+  .logo-thumb.round { border-radius: 50%; }
+  .logo-slot .meta { flex: 1; min-width: 0; }
+  .logo-slot .meta b { display: block; font-size: 14px; margin-bottom: 2px; }
+  #logo-msg:empty { display: none; }
+
+  /* 광고 금지어 경고 */
+  .lint {
+    display: none; margin-top: 6px; padding: 7px 10px; border-radius: 8px; font-size: 13px; line-height: 1.5;
+    background: #fffbe6; border: 1px solid var(--warn); white-space: pre-wrap; word-break: keep-all;
+  }
+  .lint.on { display: block; }
+  .lint b { display: block; }
+  mark { background: var(--warn); color: var(--navy); font-weight: 800; padding: 0 2px; border-radius: 3px; }
+
+  .import-note {
+    padding: 10px 14px; border-radius: 10px; font-size: 14px; font-weight: 700;
+    background: #fff; border: 1px solid rgba(11,31,77,.18); border-left: 5px solid var(--gold);
+  }
+  .import-note[hidden] { display: none; }
+  #warnings { border-color: var(--warn); background: #fffbe6; }
+  #warnings:empty { display: none; }
+  #warnings ul { margin: 0; padding-left: 18px; line-height: 1.65; font-size: 13.5px; }
+
+  .check { display: flex; gap: 8px; align-items: flex-start; font-size: 14px; cursor: pointer; margin-top: 12px; }
+  .check input { margin-top: 3px; accent-color: var(--navy); }
+
+  /* 미리보기: 위에서 아래로 한 줄 */
+  .preview-head { margin-bottom: 12px; display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  .preview-head h2 { margin: 0; font-size: 16px; font-weight: 800; }
+  #preview { display: flex; flex-direction: column; gap: 24px; max-width: 600px; }
+  .slot-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .slot-label { font-size: 13px; font-weight: 700; }
+  .preview-actions { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+  #save-status { font-size: 13px; font-weight: 600; }
+  #save-status:empty { display: none; }
+  /* 저장용으로 그리는 원본 크기 카드: 화면 밖에 둔다 */
+  #export-holder { position: fixed; left: -20000px; top: 0; width: 1080px; height: 1080px; pointer-events: none; }
+  .frame {
+    position: relative; width: 100%; aspect-ratio: 1 / 1; overflow: hidden; border-radius: 6px;
+    box-shadow: 0 1px 0 rgba(11,31,77,.08), 0 6px 18px rgba(11,31,77,.12);
+  }
+  .frame > .card { position: absolute; left: 0; top: 0; transform: scale(var(--s, .5)); transform-origin: 0 0; }
+
+  /* ───────── 카드 (1080 × 1080 기준 크기) ───────── */
+  .card {
+    position: relative; width: 1080px; height: 1080px; overflow: hidden;
+    background: var(--cream); color: var(--navy);
+    font-family: 'Pretendard', sans-serif; letter-spacing: -0.02em;
+  }
+  .card .t { white-space: pre-wrap; word-break: keep-all; overflow-wrap: anywhere; }
+  .card .empty { opacity: .3; }                 /* 아직 입력 안 한 칸: 안내 글자를 흐리게 */
+  /* 블로그 빈칸 표시([확인 필요] 등): 화면에서 노란색으로 — 저장 이미지에서는 칠하지 않음 */
+  .card mark.slot { background: var(--warn); color: var(--navy); font-weight: inherit; padding: 0 10px; border-radius: 8px; }
+
+  /* 로고 */
+  .logo { position: absolute; display: block; }
+
+  /* 오른쪽 아래 로고 (표지·내용 카드): 흰 바탕 가로형 둥근 사각형 + 글자형 로고
+     가로 17%(183.6px), 골드 테두리 4px, 반지름 20px, 안쪽 좌우 여백 12%(22px), 가장자리에서 70px */
+  .logo-badge {
+    position: absolute; right: 70px; bottom: 70px; z-index: 4;
+    box-sizing: border-box; width: 183.6px; padding: 16px 22px;
+    background: var(--white); border: 4px solid var(--gold); border-radius: 20px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .logo-badge img { display: block; width: auto; height: auto; max-width: 100%; max-height: 72px; }
+
+  /* 로고 안내 — 화면에서만 보이고 저장 이미지에는 빠짐 (data-html2canvas-ignore) */
+  .logo-guide {
+    position: absolute; z-index: 4; display: flex; align-items: center; justify-content: center; text-align: center;
+    border: 4px dashed var(--gold); color: rgba(11,31,77,.55);
+    font-size: 40px; font-weight: 600; line-height: 1.3; white-space: nowrap;
+  }
+  .logo-guide.corner { right: 70px; bottom: 70px; height: 86px; padding: 0 36px; border-radius: 20px; }
+
+  .example-badge {
+    position: absolute; top: 40px; right: 40px; z-index: 5;
+    font-size: 40px; font-weight: 700; line-height: 1; padding: 14px 26px;
+    border: 3px solid var(--gold); border-radius: 999px; background: var(--cream); color: var(--navy);
+  }
+
+  /* 표지 */
+  .cover .edge-bar { position: absolute; left: 0; top: 0; bottom: 0; width: 20px; background: var(--gold); }
+  .cover .logo.wordmark { left: 80px; top: 56px; width: auto; height: auto; max-width: 420px; max-height: 110px; }
+  .cover .logo-guide.wordmark { left: 80px; top: 56px; height: 110px; padding: 0 36px; border-radius: 12px; }
+  .cover .cover-main {
+    position: absolute; left: 100px; right: 100px; top: 220px; bottom: 170px;
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .cover .cover-title { font-size: 96px; font-weight: 800; line-height: 1.22; letter-spacing: -0.035em; }
+  .cover .rule { width: 120px; height: 8px; background: var(--gold); margin: 48px 0; flex: none; }
+  .cover .cover-sub { font-size: 48px; font-weight: 500; line-height: 1.45; }
+
+  /* 내용 */
+  .content .gold-frame { position: absolute; left: 28px; top: 28px; right: 28px; bottom: 28px; border: 3px solid var(--gold); }
+  /* 워터마크: 글자형 로고, 카드 정중앙, 가로의 80%(864px), 투명도 0.05 */
+  .content .watermark {
+    position: absolute; left: 0; top: 0; right: 0; bottom: 0; opacity: .05;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .content .watermark img { display: block; width: 864px; height: auto; max-height: 864px; }
+  /* 글 상자: 아래쪽은 로고 자리(최소 150px, 로고 상자가 더 높으면 그만큼 — layoutCard에서 맞춤).
+     넘치는 글은 잘라서 로고 상자와 겹치지 않게 하고, 경고로 알린다. */
+  .content .content-inner {
+    position: absolute; left: 110px; right: 110px; top: 150px; bottom: 150px;
+    display: flex; flex-direction: column; z-index: 2; overflow: hidden;
+  }
+  .content .card-num { font-size: 44px; font-weight: 800; color: var(--gold); letter-spacing: .04em; flex: none; }
+  .content .key-rule { width: 96px; height: 8px; background: var(--gold); margin: 40px 0 36px; flex: none; }
+  .content .card-desc { font-size: 46px; font-weight: 500; line-height: 1.5; }
+  /* 숫자 카드: 큰 숫자 → 바로 아래 '무슨 숫자인지' 한 줄 → 짧은 줄 최대 3개(불릿) */
+  .content .card-key { font-weight: 800; line-height: 1.15; letter-spacing: -0.04em; margin-top: 28px; }
+  .content .card-key.size-xl { font-size: 150px; }
+  .content .card-key.size-l  { font-size: 110px; }
+  .content .card-key.size-m  { font-size: 80px; }
+  .content .card-label { font-size: 52px; font-weight: 700; line-height: 1.3; margin-top: 20px; }
+  .content .bullet { display: flex; align-items: flex-start; gap: 24px; font-size: 46px; font-weight: 500; line-height: 1.5; }
+  .content .bullet + .bullet { margin-top: 8px; }
+  .content .bullet .dot { flex: none; width: 14px; height: 14px; border-radius: 50%; background: var(--gold); margin-top: .62em; }
+  /* 제목 카드: 소제목을 큰 제목으로 → 짧은 줄 최대 2개 */
+  .content .card-title { font-size: 84px; font-weight: 800; line-height: 1.25; letter-spacing: -0.035em; margin-top: 28px; }
+  /* 글이 많으면 한 단계씩 줄인다 (가장 작은 글자도 40px 이상) */
+  .content .content-inner.fit-1 .card-key.size-xl { font-size: 124px; }
+  .content .content-inner.fit-1 .card-key.size-l  { font-size: 96px; }
+  .content .content-inner.fit-1 .card-key.size-m  { font-size: 72px; }
+  .content .content-inner.fit-1 .card-title { font-size: 72px; }
+  .content .content-inner.fit-1 .key-rule { margin: 32px 0 28px; }
+  .content .content-inner.fit-2 .card-key.size-xl { font-size: 104px; }
+  .content .content-inner.fit-2 .card-key.size-l  { font-size: 84px; }
+  .content .content-inner.fit-2 .card-key.size-m  { font-size: 64px; }
+  .content .content-inner.fit-2 .card-title { font-size: 64px; }
+  .content .content-inner.fit-2 .card-label { font-size: 46px; }
+  .content .content-inner.fit-2 .card-desc, .content .content-inner.fit-2 .bullet { font-size: 42px; }
+  .content .content-inner.fit-2 .key-rule { margin: 28px 0 24px; }
+  .content .content-inner.fit-3 .card-key.size-xl { font-size: 88px; }
+  .content .content-inner.fit-3 .card-key.size-l  { font-size: 72px; }
+  .content .content-inner.fit-3 .card-key.size-m  { font-size: 56px; }
+  .content .content-inner.fit-3 .card-title { font-size: 56px; }
+  .content .content-inner.fit-3 .card-label { font-size: 42px; }
+  .content .content-inner.fit-3 .card-desc, .content .content-inner.fit-3 .bullet { font-size: 40px; }
+  .content .content-inner.fit-3 .key-rule { margin: 22px 0 20px; }
+
+  /* 마지막 장: 네이비 바탕, 흰 글자 */
+  .card.closing { background: var(--navy); color: var(--white); }
+  .closing .edge-top, .closing .edge-bottom { position: absolute; left: 0; right: 0; height: 16px; background: var(--gold); }
+  .closing .edge-top { top: 0; }
+  .closing .edge-bottom { bottom: 0; }
+  .closing .closing-inner {
+    position: absolute; left: 0; top: 0; right: 0; bottom: 0; padding: 110px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+  }
+  /* 가운데 흰색 글자형 로고 (네이비 부분만 흰색으로 바꾼 것) */
+  .closing .logo.center { position: relative; flex: none; width: auto; height: auto; max-width: 640px; max-height: 260px; margin-bottom: 72px; }
+  .closing .logo-space { flex: none; height: 200px; margin-bottom: 72px; }   /* 흰 로고를 만드는 동안 자리만 */
+  .closing .logo-guide.center {
+    position: relative; flex: none; width: 640px; height: 220px; border-radius: 20px; margin-bottom: 72px;
+    white-space: pre-line; color: rgba(255,255,255,.6);
+  }
+  .closing .closing-line1 { font-size: 60px; font-weight: 800; line-height: 1.35; }
+  .closing .closing-line2 { font-size: 44px; font-weight: 600; margin-top: 40px; padding-top: 28px; border-top: 4px solid var(--gold); color: var(--gold); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="head-row">
+    <h1 id="app-name"></h1>
+    <a id="blog-link" class="blog-link" hidden>← 블로그 앱으로 돌아가기</a>
+  </div>
+  <p class="head-note">로고는 내 브라우저에만 저장돼요.</p>
+</header>
+
+<div class="layout">
+  <!-- ═════ 입력 ═════ -->
+  <section class="panel" aria-label="입력">
+    <div class="import-note" id="import-note" role="status" hidden>블로그에서 가져왔어요</div>
+    <div class="box" id="warnings" aria-live="polite"></div>
+
+    <div class="box">
+      <h2>로고 설정</h2>
+      <p class="hint" style="margin-top:2px">로고는 내 브라우저에만 저장되고 인터넷에 공개되지 않아요.</p>
+      <input type="file" id="file-circle" accept="image/png,image/jpeg,image/svg+xml,.png,.jpg,.jpeg,.svg" hidden>
+      <input type="file" id="file-word" accept="image/png,image/jpeg,image/svg+xml,.png,.jpg,.jpeg,.svg" hidden>
+      <div class="logo-slot">
+        <div class="logo-thumb round" id="thumb-circle"></div>
+        <div class="meta">
+          <b>동그라미 로고</b>
+          <span class="hint">지금은 사용하지 않아요.</span>
+          <div class="row" style="margin-top:8px">
+            <button class="btn small" type="button" id="up-circle">동그라미 로고 올리기</button>
+            <button class="btn small ghost" type="button" id="del-circle">지우기</button>
+          </div>
+        </div>
+      </div>
+      <div class="logo-slot">
+        <div class="logo-thumb" id="thumb-word"></div>
+        <div class="meta">
+          <b>글자형 로고</b>
+          <span class="hint">표지 왼쪽 위 · 카드 오른쪽 아래 · 내용 카드 워터마크 · 마지막 장 가운데(흰색)에 들어가요.</span>
+          <div class="row" style="margin-top:8px">
+            <button class="btn small" type="button" id="up-word">글자형 로고 올리기</button>
+            <button class="btn small ghost" type="button" id="del-word">지우기</button>
+          </div>
+        </div>
+      </div>
+      <p class="hint" id="logo-msg" role="status"></p>
+    </div>
+
+    <div class="box">
+      <h2>표지</h2>
+      <label class="field" for="cover-title">카드 제목</label>
+      <textarea id="cover-title" rows="2" placeholder="예: 이번 달 안암·성북 아파트 시세"></textarea>
+      <p class="hint">Enter로 줄을 바꿀 수 있어요 (2줄 권장).</p>
+      <div class="lint" id="lint-cover-title"></div>
+      <label class="field" for="cover-sub">부제</label>
+      <input type="text" id="cover-sub" placeholder="예: 안암·성북 부동산 소식">
+      <div class="lint" id="lint-cover-sub"></div>
+    </div>
+
+    <div class="box">
+      <h2>내용 카드 <small id="content-count"></small></h2>
+      <div id="content-list"></div>
+      <div class="row" style="margin-top:14px">
+        <button class="btn small ghost" type="button" id="btn-add">+ 카드 추가</button>
+        <span class="hint" id="add-hint" style="margin:0" hidden></span>
+      </div>
+    </div>
+
+    <div class="box">
+      <h2>마지막 장</h2>
+      <label class="field" for="closing-1">첫째 줄</label>
+      <input type="text" id="closing-1">
+      <div class="lint" id="lint-closing-1"></div>
+      <label class="field" for="closing-2">둘째 줄</label>
+      <input type="text" id="closing-2">
+      <div class="lint" id="lint-closing-2"></div>
+    </div>
+
+    <div class="box">
+      <h2>예시</h2>
+      <p class="hint" style="margin-top:2px">안암·성북 시세 이야기를 가상 숫자로 채웁니다. 카드마다 ‘예시 데이터입니다’가 붙습니다.</p>
+      <div class="row" style="margin-top:10px">
+        <button class="btn" type="button" id="btn-example">예시 채우기</button>
+        <button class="btn ghost" type="button" id="btn-clear">모두 지우기</button>
+      </div>
+      <label class="check">
+        <input type="checkbox" id="example-flag">
+        <span>카드에 ‘예시 데이터입니다’ 표시<br><span class="hint">숫자를 직접 확인한 값으로 모두 바꾼 뒤에만 끄세요.</span></span>
+      </label>
+    </div>
+  </section>
+
+  <!-- ═════ 미리보기 ═════ -->
+  <section aria-label="미리보기">
+    <div class="preview-head">
+      <h2>미리보기</h2>
+      <span class="hint" style="margin:0">실제 크기 1080×1080 · 점선 안내는 화면에서만 보이고 저장 이미지에는 나오지 않아요</span>
+      <div class="preview-actions">
+        <span id="save-status" role="status" aria-live="polite"></span>
+        <button class="btn" type="button" id="btn-save-all" title="모든 카드를 ZIP 파일 하나로 저장해요">전체 저장 (ZIP)</button>
+      </div>
+    </div>
+    <div id="preview"></div>
+  </section>
+</div>
+
+<div id="export-holder" aria-hidden="true"></div>
+
+<script>
+/* ═════════ 설정 ═════════ */
+const APP_NAME = '에이스부동산 카드뉴스 스튜디오';
+const BLOG_URL = '';   // 블로그 앱 주소. 비어 있으면 맨 위 '블로그 앱으로 돌아가기' 링크를 숨긴다.
+
+const EXAMPLE_LABEL = '예시 데이터입니다';
+const DEFAULT_CLOSING = ['똑똑똑, 좋은 집의 문을 함께 엽니다', '에이스부동산 최희원'];
+const BANNED_WORDS = ['무조건', '100%', '확실', '최고', '최저', '보장', '완벽', '절대', '유일', '1위', '대박', '반드시'];
+
+const MIN_CONTENT = 2;   // 내용 카드 2~8장
+const MAX_CONTENT = 8;
+const LONG_TEXT = 60;    // 카드 글자 수(공백 제외)가 이보다 많으면 워터마크를 끈다
+const LIMIT = { sub: 12, question: 20, key: 8, desc: 20 };   // 글자 수 기준(공백 제외): 제목, 질문 제목, 큰 숫자, 짧은 줄 한 줄
+const MAX_LINES = { number: 3, title: 2 };   // 숫자 카드는 짧은 줄 3개(불릿), 제목 카드는 2개
+
+// 빈 칸일 때 카드에 흐리게 보여 줄 안내 글자 (화면에서만, 저장 이미지에서는 숨김)
+const PH = {
+  coverTitle: '카드 제목', coverSub: '부제',
+  title: '소제목', label: '이 숫자가 무엇인지 한 줄', line: '짧은 줄',
+};
+
+// 카드 종류: '큰 핵심'에 단위가 붙은 숫자가 있으면 숫자 카드, 아니면 제목 카드
+const NUMBER_KEY_RE = /\d[\d,.]*\s*(?:%p|%|％|억|천|만|원|건|㎡|m²|평|층|개월|년|월|일|주|분|시간|세대|가구|개|명|인|호|배|대|곳|위|회|차|km)/;
+const isNumberCard = (c) => NUMBER_KEY_RE.test(c.key || '');
+const filledLines = (c) => (c.lines || []).map((l) => (l || '').trim()).filter(Boolean);
+
+// 예시 채우기 — 모든 숫자는 가상입니다. (CLAUDE.md: 예시 데이터에는 '예시 데이터입니다' 표시)
+const EXAMPLE = () => ({
+  isExample: true,
+  cover: { title: '이번 달 안암·성북\n아파트 시세', subtitle: '안암·성북 부동산 소식' },
+  contents: [
+    { sub: '안암동 아파트 평균 매매가', key: '8억 2천만 원', lines: ['전용 84㎡ 기준', '지난달보다 조금 오름', ''] },
+    { sub: '성북구 평균 전세가율', key: '58%', lines: ['매매가 대비 전세가 비율', '지난해보다 낮아짐', ''] },
+    { sub: '이번 달 거래 건수', key: '42건', lines: ['안암·성북 아파트 기준', '이사철 앞두고 늘어남', ''] },
+    { sub: '이사 전 확인할 점', key: '', lines: ['계약 전 등기부등본 확인', '관리비 포함 항목 확인', ''] },
+  ].map((c) => ({ ...newContent(), ...c })),
+  closing: [...DEFAULT_CLOSING],
+});
+const EMPTY = () => ({
+  isExample: false,
+  cover: { title: '', subtitle: '' },
+  contents: [newContent(), newContent()],
+  closing: [...DEFAULT_CLOSING],
+});
+// sub: 숫자 카드에서는 숫자 아래 설명 한 줄, 제목 카드에서는 큰 제목 / key: 큰 숫자 / lines: 짧은 줄 최대 3개
+function newContent() { return { sub: '', key: '', lines: ['', '', ''], noWatermark: false }; }
+
+/* ═════════ 로고 저장소 (localStorage, 항상 try/catch) ═════════ */
+const LOGO_KEY = { circle: 'acecard.logo.circle', word: 'acecard.logo.word' };
+const LOGO_TYPES = ['image/png', 'image/jpeg', 'image/svg+xml'];
+const LOGO_MAX_PX = 800;   // 저장 공간을 아끼려고 긴 변을 이 크기로 줄인다
+const LOGO_GUIDE = '로고를 올리면 여기에 들어가요';
+
+function storeGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+function storeSet(k, v) {
+  try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); return true; }
+  catch (e) { return false; }
+}
+
+/* ═════════ 상태 ═════════ */
+let state = EMPTY();
+const logos = { circle: storeGet(LOGO_KEY.circle), word: storeGet(LOGO_KEY.word) };
+
+/* ═════════ 도우미 ═════════ */
+const $ = (id) => document.getElementById(id);
+function el(tag, cls, text) {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (text != null) n.textContent = text;
+  return n;
+}
+// 블로그에서 넘어온 빈칸 표시: [확인 필요], [작성자 경험 입력], [작성자 해설 입력], [직접 촬영 필요] 등
+const SLOT_RE = /\[(?:확인 필요|작성자[^\]\n]*입력|직접 촬영 필요)[^\]\n]*\]/g;
+const findSlots = (text) => [...new Set(String(text || '').match(SLOT_RE) || [])];
+
+// 값이 비어 있으면 안내 글자를 흐리게 보여 준다. 빈칸 표시는 노란색으로 칠한다(화면 전용).
+function textEl(cls, value, placeholder) {
+  const v = (value || '').trim();
+  const n = el('div', `${cls} t${v ? '' : ' empty'}`);
+  if (!v) { n.textContent = placeholder; return n; }
+  let last = 0;
+  for (const m of v.matchAll(SLOT_RE)) {
+    if (m.index > last) n.append(document.createTextNode(v.slice(last, m.index)));
+    n.append(el('mark', 'slot', m[0]));
+    last = m.index + m[0].length;
+  }
+  if (last < v.length) n.append(document.createTextNode(v.slice(last)));
+  return n;
+}
+const pad2 = (n) => String(n).padStart(2, '0');
+const escapeHtml = (s) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const BANNED_RE = new RegExp(BANNED_WORDS.map(escapeRe).join('|'), 'g');
+const findBanned = (text) => [...new Set((text || '').match(BANNED_RE) || [])];
+
+// 입력칸 아래 노란 경고: 광고 금지어와 빈칸 표시
+function lintInto(box, text) {
+  const hits = findBanned(text);
+  const slots = findSlots(text);
+  if (!hits.length && !slots.length) { box.classList.remove('on'); box.innerHTML = ''; return; }
+  // 원문을 먼저 이스케이프한 뒤, 금지어·빈칸 표시(이스케이프된 형태)에만 <mark>
+  const words = [...hits, ...slots].map((w) => escapeRe(escapeHtml(w)));
+  const re = new RegExp(words.join('|'), 'g');
+  const titles = [];
+  if (hits.length) titles.push(`<b>⚠ 광고 금지어: ${hits.map(escapeHtml).join(', ')}</b>`);
+  if (slots.length) titles.push(`<b>⚠ 빈칸을 채워 주세요: ${slots.map(escapeHtml).join(', ')}</b>`);
+  box.innerHTML = titles.join('') + escapeHtml(text).replace(re, (m) => `<mark>${m}</mark>`);
+  box.classList.add('on');
+}
+
+const charCount = (c) => [c.sub, c.key, ...(c.lines || [])].join('').replace(/\s/g, '').length;
+const isLong = (c) => charCount(c) > LONG_TEXT;
+const hasWatermark = (c) => !!logos.word && !c.noWatermark && !isLong(c);
+function watermarkState(c) {
+  if (!logos.word) return '글자형 로고 없음';
+  if (c.noWatermark) return '꺼짐';
+  if (isLong(c)) return '꺼짐 (글이 많음)';
+  return '켜짐';
+}
+function keySize(key) {
+  const n = (key || '').length;
+  return n <= 7 ? 'size-xl' : n <= 11 ? 'size-l' : 'size-m';
+}
+
+/* ═════════ 카드 만들기 ═════════ */
+// 로고가 있으면 이미지, 없으면 화면 전용 안내(저장 이미지에서는 빠짐)
+function logoOrGuide(kind, src, guideText = LOGO_GUIDE) {
+  if (src) {
+    const i = new Image();
+    i.src = src; i.alt = ''; i.className = `logo ${kind}`;
+    return i;
+  }
+  const g = el('div', `logo-guide ${kind} screen-only`, guideText);
+  g.setAttribute('data-html2canvas-ignore', 'true');
+  return g;
+}
+// 오른쪽 아래: 흰 바탕 둥근 사각형 안에 글자형 로고
+function cornerBadge() {
+  if (!logos.word) return logoOrGuide('corner', null);
+  const b = el('div', 'logo-badge');
+  const i = new Image(); i.src = logos.word; i.alt = '';
+  b.append(i);
+  return b;
+}
+function decorate(card, { corner = true } = {}) {
+  if (corner) card.append(cornerBadge());
+  if (state.isExample) card.append(el('div', 'example-badge', EXAMPLE_LABEL));
+}
+
+function buildCover() {
+  const c = el('div', 'card cover');
+  c.append(el('div', 'edge-bar'), logoOrGuide('wordmark', logos.word));
+  const main = el('div', 'cover-main');
+  main.append(textEl('cover-title', state.cover.title, PH.coverTitle), el('div', 'rule'), textEl('cover-sub', state.cover.subtitle, PH.coverSub));
+  c.append(main);
+  decorate(c);
+  return c;
+}
+
+function buildContent(item, i) {
+  const c = el('div', 'card content');
+  c.append(el('div', 'gold-frame'));
+  if (hasWatermark(item)) {                     // 직접 껐거나 글이 많으면 없음
+    const w = el('div', 'watermark');
+    const i = new Image(); i.src = logos.word; i.alt = '';
+    w.append(i);
+    c.append(w);
+  }
+  const inner = el('div', 'content-inner');
+  inner.append(el('div', 'card-num', pad2(i + 1)));
+  const lines = filledLines(item);
+  if (isNumberCard(item)) {
+    // 숫자 카드: 큰 숫자 → 무슨 숫자인지 한 줄 → 짧은 줄 최대 3개(불릿)
+    inner.append(
+      textEl(`card-key ${keySize(item.key)}`, item.key, ''),
+      textEl('card-label', item.sub, PH.label),
+      el('div', 'key-rule'),
+    );
+    if (!lines.length) inner.append(textEl('card-desc', '', PH.line));
+    lines.slice(0, MAX_LINES.number).forEach((l) => {
+      const b = el('div', 'bullet');
+      b.append(el('span', 'dot'), textEl('card-desc', l, ''));
+      inner.append(b);
+    });
+  } else {
+    // 제목 카드: 소제목을 큰 제목으로 → 짧은 줄 최대 2개. '큰 핵심' 안내 글자는 보이지 않는다.
+    // 소제목이 비어 있고 큰 핵심에 글자가 있으면 그것을 제목으로 쓴다.
+    inner.append(textEl('card-title', item.sub || item.key, PH.title), el('div', 'key-rule'));
+    if (!lines.length) inner.append(textEl('card-desc', '', PH.line));
+    lines.slice(0, MAX_LINES.title).forEach((l) => inner.append(textEl('card-desc', l, '')));
+  }
+  c.append(inner);
+  decorate(c);
+  return c;
+}
+
+// 글 상자 맞추기: 아래 로고 자리를 비우고(최소 150px), 넘치면 글자를 한 단계씩 줄인다.
+// 화면 미리보기에서 맞춘 값(인라인 bottom, fit-N)을 저장할 때 그대로 복사하므로 크기·간격이 같다.
+const LOGO_RESERVE = 150, LOGO_EDGE = 70, LOGO_GAP = 16;
+function layoutCard(card) {
+  const inner = card && card.querySelector('.content-inner');
+  if (!inner) return;
+  const badge = card.querySelector('.logo-badge, .logo-guide.corner');
+  const h = badge ? badge.offsetHeight : 0;
+  inner.style.bottom = `${Math.max(LOGO_RESERVE, h ? LOGO_EDGE + h + LOGO_GAP : 0)}px`;
+  for (let lv = 0; lv <= 3; lv++) {
+    inner.classList.remove('fit-1', 'fit-2', 'fit-3');
+    if (lv) inner.classList.add(`fit-${lv}`);
+    if (inner.scrollHeight <= inner.clientHeight + 1) break;
+  }
+}
+function layoutAll() { previewCards.forEach(layoutCard); }
+
+function buildClosing() {
+  const c = el('div', 'card closing');
+  c.append(el('div', 'edge-top'), el('div', 'edge-bottom'));
+  const inner = el('div', 'closing-inner');
+  // 흰색 글자형 로고. 로고는 있는데 흰 버전을 만드는 중이면 자리만 둔다.
+  const center = logos.wordWhite ? logoOrGuide('center', logos.wordWhite)
+    : logos.word ? el('div', 'logo-space')
+    : logoOrGuide('center', null, '로고를 올리면\n여기에 들어가요');
+  inner.append(
+    center,
+    textEl('closing-line1', state.closing[0], DEFAULT_CLOSING[0]),
+    textEl('closing-line2', state.closing[1], DEFAULT_CLOSING[1]),
+  );
+  c.append(inner);
+  decorate(c, { corner: false });   // 마지막 장은 구석 로고를 뺀다
+  return c;
+}
+
+/* ═════════ 미리보기 ═════════ */
+let previewCards = [];   // 지금 미리보기에 있는 카드들 (저장할 때 이걸 원본 크기로 다시 그린다)
+let saving = false;
+function renderPreview() {
+  const box = $('preview');
+  box.innerHTML = '';
+  const cards = [
+    ['표지', buildCover()],
+    ...state.contents.map((it, i) => [`내용 ${i + 1}`, buildContent(it, i)]),
+    ['마지막 장', buildClosing()],
+  ];
+  previewCards = cards.map(([, node]) => node);
+  cards.forEach(([label, node], idx) => {
+    const slot = el('div', 'slot');
+    const head = el('div', 'slot-head');
+    const save = el('button', 'btn small ghost', '이 카드 저장');
+    save.type = 'button';
+    save.disabled = saving;
+    save.onclick = () => saveOne(idx);
+    head.append(el('span', 'slot-label', `${pad2(idx + 1)} · ${label}`), save);
+    const frame = el('div', 'frame');
+    frame.append(node);
+    slot.append(head, frame);
+    box.append(slot);
+    // 로고 그림이 늦게 읽히면 로고 상자 높이가 바뀌므로 다시 맞춘다
+    node.querySelectorAll('.logo-badge img').forEach((im) => {
+      if (!im.complete) im.addEventListener('load', () => { layoutCard(node); renderWarnings(); }, { once: true });
+    });
+  });
+  fitScale();
+  layoutAll();
+  requestAnimationFrame(renderWarnings);
+}
+
+function fitScale() {
+  const f = document.querySelector('#preview .frame');
+  if (f && f.clientWidth) $('preview').style.setProperty('--s', f.clientWidth / 1080);
+}
+new ResizeObserver(fitScale).observe($('preview'));
+
+/* ═════════ 경고 모음 ═════════ */
+function renderWarnings() {
+  const list = [];
+  const fields = [
+    ['표지 제목', state.cover.title], ['부제', state.cover.subtitle],
+    ...state.contents.flatMap((c, i) => [
+      [`내용 ${i + 1} 소제목`, c.sub], [`내용 ${i + 1} 핵심`, c.key],
+      [`내용 ${i + 1} 짧은 줄`, c.lines.join(' ')],
+    ]),
+    ['마지막 장', state.closing.join(' ')],
+  ];
+  fields.forEach(([name, text]) => {
+    const hits = findBanned(text);
+    if (hits.length) list.push(`${escapeHtml(name)}: 광고 금지어 ${hits.map((h) => `<mark>${escapeHtml(h)}</mark>`).join(' ')}`);
+    const slots = findSlots(text);
+    if (slots.length) list.push(`${escapeHtml(name)}: 빈칸 ${slots.map((h) => `<mark>${escapeHtml(h)}</mark>`).join(' ')}을(를) 채워 주세요`);
+  });
+  // 글자 수 기준을 넘는 칸 (줄여도 넘치면 계속 보여 준다)
+  state.contents.forEach((c, i) => {
+    const over = [];
+    const chk = (name, v, max) => { if (textLen(v) > max) over.push(`${name} ${textLen(v)}자(${max}자 이내)`); };
+    const num = isNumberCard(c);
+    const lines = filledLines(c);
+    if (num) {
+      chk('큰 숫자', c.key, LIMIT.key);
+      chk('숫자 설명 줄', c.sub, LIMIT.desc);
+    } else {
+      const title = c.sub || c.key;
+      chk('제목', title, /[?？]\s*$/.test(title) ? LIMIT.question : LIMIT.sub);   // 질문(FAQ)은 조금 더 길게
+    }
+    lines.forEach((l, k) => chk(`짧은 줄 ${k + 1}`, l, LIMIT.desc));
+    if (over.length) {
+      const numNote = num && textLen(c.key) > LIMIT.key ? ' · 숫자는 줄이지 않았어요' : '';
+      list.push(`내용 ${i + 1}: 글자 수가 많아요 — ${over.join(', ')}. 줄여 주세요${numNote}`);
+    }
+    const max = num ? MAX_LINES.number : MAX_LINES.title;
+    if (lines.length > max) list.push(`내용 ${i + 1}: ${num ? '숫자' : '제목'} 카드에는 짧은 줄 ${max}개까지만 나와요 — ${max + 1}번째 줄은 카드에 보이지 않아요`);
+    if (!num && c.sub && c.key.trim()) list.push(`내용 ${i + 1}: 큰 핵심 ‘${escapeHtml(c.key.trim())}’에 단위가 붙은 숫자가 없어 제목 카드로 보여요 — 이 칸은 카드에 나오지 않아요`);
+  });
+  const contentInners = [...document.querySelectorAll('#preview .content-inner')];
+  contentInners.forEach((n, i) => {
+    if (n.scrollHeight > n.clientHeight + 2) list.push(`내용 ${i + 1}: 글이 카드 밖으로 넘칩니다. 줄여 주세요.`);
+  });
+  const cover = document.querySelector('#preview .cover-main');
+  if (cover && cover.scrollHeight > cover.clientHeight + 2) list.push('표지: 제목이 너무 길어 넘칩니다. 줄여 주세요.');
+  if (state.isExample) list.push('예시 데이터 사용 중 — 모든 카드에 ‘예시 데이터입니다’가 표시됩니다.');
+  $('warnings').innerHTML = list.length ? `<ul>${list.map((t) => `<li>${t}</li>`).join('')}</ul>` : '';
+}
+
+/* ═════════ 입력 화면 ═════════ */
+function field(labelText, id, value, placeholder, onInput) {
+  const frag = document.createDocumentFragment();
+  const l = el('label', 'field', labelText); l.htmlFor = id;
+  const i = el('input'); i.type = 'text'; i.id = id; i.value = value; i.placeholder = placeholder;
+  const lint = el('div', 'lint');
+  i.oninput = () => { onInput(i.value); lintInto(lint, i.value); changed(); };
+  lintInto(lint, value);
+  frag.append(l, i, lint);
+  return frag;
+}
+
+function renderContentEditor() {
+  const list = $('content-list');
+  list.innerHTML = '';
+  state.contents.forEach((item, i) => {
+    const wrap = el('div', 'content-item');
+    const head = el('div', 'head');
+    head.append(el('b', '', `내용 ${i + 1}`));
+    const del = el('button', 'btn small ghost', '삭제');
+    del.type = 'button';
+    del.disabled = state.contents.length <= MIN_CONTENT;
+    del.title = del.disabled ? `내용 카드는 최소 ${MIN_CONTENT}장이에요` : '';
+    del.onclick = () => { state.contents.splice(i, 1); changed(true); };
+    head.append(del);
+
+    const info = el('div', 'item-info');
+    const updateInfo = () => {
+      info.textContent = `${isNumberCard(item) ? '숫자 카드' : '제목 카드'} · ${charCount(item)}자 · 워터마크 ${watermarkState(item)}`;
+    };
+    const upd = (k) => (v) => { item[k] = v; updateInfo(); };
+
+    // 짧은 줄은 세 칸 (숫자 카드는 3개 모두, 제목 카드는 앞의 2개만 카드에 나온다)
+    const descLabel = el('label', 'field', '짧은 줄 (한 줄 20자 안팎 · 숫자 카드 3줄, 제목 카드 2줄)'); descLabel.htmlFor = `c${i}-l0`;
+    const dLint = el('div', 'lint');
+    const lineInputs = [0, 1, 2].map((k) => {
+      const inp = el('input'); inp.type = 'text'; inp.id = `c${i}-l${k}`; inp.value = item.lines[k] || '';
+      inp.placeholder = `${k + 1}번째 줄`;
+      if (k) inp.setAttribute('aria-label', `짧은 줄 ${k + 1}`);
+      inp.oninput = () => { item.lines[k] = inp.value; updateInfo(); lintDesc(); changed(); };
+      return inp;
+    });
+    const lintDesc = () => lintInto(dLint, lineInputs.map((x) => x.value).join('\n'));
+    lintDesc();
+
+    // 카드마다 워터마크 끄기
+    const wmLabel = el('label', 'check');
+    const wm = el('input'); wm.type = 'checkbox'; wm.checked = !!item.noWatermark;
+    wm.onchange = () => { item.noWatermark = wm.checked; updateInfo(); changed(); };
+    wmLabel.append(wm, el('span', '', '워터마크 끄기'));
+
+    wrap.append(
+      head,
+      field('소제목 (숫자 카드: 숫자 아래 설명 한 줄 · 제목 카드: 큰 제목)', `c${i}-sub`, item.sub, '예: 안암동 아파트 평균 매매가', upd('sub')),
+      field('큰 숫자 (단위까지, 예: 58% · 비우면 제목 카드)', `c${i}-key`, item.key, '예: 8억 2천만 원', upd('key')),
+      descLabel, ...lineInputs, dLint, wmLabel, info,
+    );
+    updateInfo();
+    list.append(wrap);
+  });
+  $('content-count').textContent = `${state.contents.length}장 · ${MIN_CONTENT}~${MAX_CONTENT}장`;
+  const full = state.contents.length >= MAX_CONTENT;
+  $('btn-add').disabled = full;
+  $('add-hint').hidden = !full;
+  $('add-hint').textContent = full ? `최대 ${MAX_CONTENT}장까지 추가할 수 있어요` : '';
+}
+
+function fillStaticFields() {
+  $('cover-title').value = state.cover.title;
+  $('cover-sub').value = state.cover.subtitle;
+  $('closing-1').value = state.closing[0];
+  $('closing-2').value = state.closing[1];
+  $('example-flag').checked = state.isExample;
+  [['cover-title', state.cover.title], ['cover-sub', state.cover.subtitle],
+   ['closing-1', state.closing[0]], ['closing-2', state.closing[1]]].forEach(([id, v]) => lintInto($(`lint-${id}`), v));
+}
+
+function changed(rebuildEditor = false) {
+  if (rebuildEditor) renderContentEditor();
+  renderPreview();
+}
+
+function bindStatic(id, setter) {
+  $(id).oninput = (e) => { setter(e.target.value); lintInto($(`lint-${id}`), e.target.value); changed(); };
+}
+bindStatic('cover-title', (v) => { state.cover.title = v; });
+bindStatic('cover-sub', (v) => { state.cover.subtitle = v; });
+bindStatic('closing-1', (v) => { state.closing[0] = v; });
+bindStatic('closing-2', (v) => { state.closing[1] = v; });
+
+$('example-flag').onchange = (e) => { state.isExample = e.target.checked; changed(); };
+$('btn-add').onclick = () => {
+  if (state.contents.length < MAX_CONTENT) { state.contents.push(newContent()); changed(true); }
+};
+
+const hasInput = () => !!(state.cover.title || state.cover.subtitle || state.contents.some((c) => charCount(c)));
+$('btn-example').onclick = () => {
+  if (hasInput() && !confirm('지금 입력한 내용을 지우고 예시로 채울까요?')) return;
+  state = EXAMPLE(); fillStaticFields(); changed(true); showImportNote(false);
+};
+$('btn-clear').onclick = () => {
+  if (hasInput() && !confirm('입력한 내용을 모두 지울까요?')) return;
+  state = EMPTY(); fillStaticFields(); changed(true); showImportNote(false);
+};
+
+/* ═════════ 로고 올리기 ═════════ */
+// 이미지를 읽어 PNG 데이터로 바꾼다. 동그라미 로고는 가운데를 정사각형으로 자른다.
+function readLogo(file, squareCrop) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onerror = () => reject(new Error('read'));
+    r.onload = () => {
+      const im = new Image();
+      im.onerror = () => reject(new Error('decode'));
+      im.onload = () => {
+        const isSvg = file.type === 'image/svg+xml';
+        let sw = im.naturalWidth, sh = im.naturalHeight, sx = 0, sy = 0;
+        if (!sw || !sh) return isSvg ? resolve(r.result) : reject(new Error('size'));
+        if (squareCrop) { const s = Math.min(sw, sh); sx = (sw - s) / 2; sy = (sh - s) / 2; sw = sh = s; }
+        // SVG는 선명하게 키워서, 사진은 크면 줄여서 저장
+        const k = isSvg ? LOGO_MAX_PX / Math.max(sw, sh) : Math.min(1, LOGO_MAX_PX / Math.max(sw, sh));
+        try {
+          const cv = document.createElement('canvas');
+          cv.width = Math.max(1, Math.round(sw * k));
+          cv.height = Math.max(1, Math.round(sh * k));
+          cv.getContext('2d').drawImage(im, sx, sy, sw, sh, 0, 0, cv.width, cv.height);
+          resolve(cv.toDataURL('image/png'));
+        } catch (e) {
+          resolve(r.result);   // 변환이 막히면 원본 그대로
+        }
+      };
+      im.src = r.result;
+    };
+    r.readAsDataURL(file);
+  });
+}
+
+function logoMsg(text) { $('logo-msg').textContent = text || ''; }
+
+function renderLogoPanel() {
+  ['circle', 'word'].forEach((kind) => {
+    const t = $(`thumb-${kind}`);
+    t.innerHTML = '';
+    if (logos[kind]) { const i = new Image(); i.src = logos[kind]; i.alt = ''; t.append(i); }
+    else t.textContent = '없음';
+    $(`del-${kind}`).disabled = !logos[kind];
+  });
+}
+
+// 마지막 장용 흰색 글자형 로고: 네이비에 더 가까운 색은 흰색으로, 골드에 더 가까운 색은 그대로.
+// 투명도(가장자리 부드러움)는 그대로 둔다. 저장하지 않고 열 때마다 만든다.
+const NAVY_RGB = [11, 31, 77], GOLD_RGB = [201, 162, 74];
+const dist2 = (r, g, b, c) => (r - c[0]) ** 2 + (g - c[1]) ** 2 + (b - c[2]) ** 2;
+function makeWhiteLogo(src) {
+  return new Promise((resolve, reject) => {
+    const im = new Image();
+    im.onerror = reject;
+    im.onload = () => {
+      const w = im.naturalWidth || LOGO_MAX_PX, h = im.naturalHeight || Math.round(LOGO_MAX_PX / 4);
+      const cv = document.createElement('canvas');
+      cv.width = w; cv.height = h;
+      const ctx = cv.getContext('2d');
+      ctx.drawImage(im, 0, 0, w, h);
+      const data = ctx.getImageData(0, 0, w, h);
+      const p = data.data;
+      for (let i = 0; i < p.length; i += 4) {
+        if (!p[i + 3]) continue;
+        if (dist2(p[i], p[i + 1], p[i + 2], NAVY_RGB) < dist2(p[i], p[i + 1], p[i + 2], GOLD_RGB)) {
+          p[i] = p[i + 1] = p[i + 2] = 255;
+        }
+      }
+      ctx.putImageData(data, 0, 0);
+      resolve(cv.toDataURL('image/png'));
+    };
+    im.src = src;
+  });
+}
+let whiteJob = 0;
+function refreshWhiteLogo() {
+  const job = ++whiteJob;
+  logos.wordWhite = null;
+  if (!logos.word) return;
+  makeWhiteLogo(logos.word)
+    .then((url) => { if (job === whiteJob) { logos.wordWhite = url; renderPreview(); } })
+    .catch(() => { if (job === whiteJob) { logos.wordWhite = logos.word; renderPreview(); } });  // 실패하면 원본으로
+}
+
+function logosChanged() {
+  refreshWhiteLogo();
+  renderLogoPanel();
+  changed(true);   // 워터마크 상태 문구도 다시 그린다
+}
+
+function bindLogo(kind) {
+  const input = $(`file-${kind}`);
+  $(`up-${kind}`).onclick = () => input.click();
+  input.onchange = async () => {
+    const file = input.files[0];
+    input.value = '';
+    if (!file) return;
+    const okType = LOGO_TYPES.includes(file.type) || /\.(png|jpe?g|svg)$/i.test(file.name);
+    if (!okType) { logoMsg('PNG, JPG, SVG 파일만 올릴 수 있어요.'); return; }
+    try {
+      logos[kind] = await readLogo(file, kind === 'circle');
+    } catch (e) {
+      logoMsg('이미지를 읽지 못했어요. 다른 파일로 다시 올려 주세요.');
+      return;
+    }
+    const saved = storeSet(LOGO_KEY[kind], logos[kind]);
+    logoMsg(saved ? '' : '브라우저에 저장하지 못했어요. 지금 화면에서는 쓰이지만 새로고침하면 사라져요.');
+    logosChanged();
+  };
+  $(`del-${kind}`).onclick = () => {
+    logos[kind] = null;
+    storeSet(LOGO_KEY[kind], null);
+    logoMsg('');
+    logosChanged();
+  };
+}
+bindLogo('circle');
+bindLogo('word');
+
+/* ═════════ PNG 저장 ═════════ */
+const CARD_PX = 1080;
+const FILE_PREFIX = '카드뉴스_';
+const FONT_WEIGHTS = [500, 600, 700, 800];   // 카드에 쓰는 Pretendard 굵기
+
+// 한글이 깨지지 않게 카드에 쓰는 굵기를 모두 불러온 뒤에 그린다
+async function waitForFonts() {
+  if (!document.fonts) return;
+  await Promise.all(FONT_WEIGHTS.map((w) => document.fonts.load(`${w} 40px "Pretendard"`, '가나다ABC123').catch(() => null)));
+  await document.fonts.ready;
+}
+
+// 로고 이미지가 다 읽힌 뒤에 그린다
+async function waitForImages(node) {
+  await Promise.all([...node.querySelectorAll('img')].map((im) => (im.decode ? im.decode().catch(() => null) : null)));
+}
+
+// 카드 하나를 화면 축소와 상관없이 원본 1080×1080으로 그린다
+async function renderCard(idx) {
+  const holder = $('export-holder');
+  await waitForImages(previewCards[idx]);
+  layoutCard(previewCards[idx]);            // 글꼴·로고가 다 읽힌 상태로 한 번 더 맞춘 뒤 복사
+  const node = previewCards[idx].cloneNode(true);
+  // 화면용 안내는 빼고, 비어 있는 칸의 흐린 안내 글자는 자리만 남기고 숨긴다(간격 유지)
+  node.querySelectorAll('.screen-only').forEach((n) => n.remove());
+  node.querySelectorAll('.empty').forEach((n) => { n.style.visibility = 'hidden'; });
+  node.querySelectorAll('mark.slot').forEach((m) => m.replaceWith(document.createTextNode(m.textContent)));
+  holder.append(node);
+  try {
+    await waitForImages(node);
+    return await html2canvas(node, {
+      width: CARD_PX, height: CARD_PX, scale: 1,
+      windowWidth: CARD_PX, windowHeight: CARD_PX, scrollX: 0, scrollY: 0,
+      backgroundColor: null, logging: false,
+      ignoreElements: (n) => n.classList && n.classList.contains('screen-only'),
+    });
+  } finally {
+    node.remove();
+  }
+}
+
+function canvasToBlob(canvas) {
+  return new Promise((resolve, reject) => canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('blob'))), 'image/png'));
+}
+function downloadBlob(blob, name) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = name;
+  document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+}
+const fileName = (idx) => `${FILE_PREFIX}${pad2(idx + 1)}.png`;
+
+function setSaving(on, text = '') {
+  saving = on;
+  $('save-status').textContent = text;
+  $('btn-save-all').disabled = on;
+  document.querySelectorAll('#preview .slot-head .btn').forEach((b) => { b.disabled = on; });
+}
+
+function canSave() {
+  if (typeof html2canvas !== 'function') {
+    alert('이미지 저장 도구를 불러오지 못했어요. 인터넷 연결을 확인하고 새로고침해 주세요.');
+    return false;
+  }
+  // 블로그 빈칸 표시가 남아 있으면 한 번 묻는다
+  if (allTexts().some((t) => findSlots(t).length)) {
+    return confirm('[확인 필요] 같은 빈칸 표시가 아직 남아 있어요. 그래도 저장할까요?');
+  }
+  return true;
+}
+const allTexts = () => [state.cover.title, state.cover.subtitle, ...state.closing,
+  ...state.contents.flatMap((c) => [c.sub, c.key, ...c.lines])];
+
+async function saveOne(idx) {
+  if (saving || !canSave()) return;
+  setSaving(true, '저장 중…');
+  try {
+    await waitForFonts();
+    downloadBlob(await canvasToBlob(await renderCard(idx)), fileName(idx));
+    setSaving(false, `${fileName(idx)} 저장했어요`);
+  } catch (e) {
+    setSaving(false, '');
+    alert('저장하지 못했어요. 다시 시도해 주세요.');
+  }
+}
+
+/* ─── ZIP 묶기 (라이브러리 없이) ───
+   PNG는 이미 압축된 파일이라 '압축 없이 담기(stored)' 방식으로 묶는다.
+   파일 이름이 한글이라 UTF-8 표시(0x0800)를 켠다. */
+const ZIP_NAME = '카드뉴스.zip';
+const CRC_TABLE = (() => {
+  const t = new Uint32Array(256);
+  for (let n = 0; n < 256; n++) {
+    let c = n;
+    for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1;
+    t[n] = c >>> 0;
+  }
+  return t;
+})();
+function crc32(bytes) {
+  let c = 0xFFFFFFFF;
+  for (let i = 0; i < bytes.length; i++) c = CRC_TABLE[(c ^ bytes[i]) & 0xFF] ^ (c >>> 8);
+  return (c ^ 0xFFFFFFFF) >>> 0;
+}
+function makeZip(files) {   // files: [{ name, bytes: Uint8Array }]
+  const enc = new TextEncoder();
+  const d = new Date();
+  const time = (d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1);
+  const date = ((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate();
+  const parts = [], central = [];
+  let offset = 0;
+  for (const f of files) {
+    const name = enc.encode(f.name);
+    const crc = crc32(f.bytes), size = f.bytes.length;
+    const lh = new DataView(new ArrayBuffer(30));       // 파일 머리
+    lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, 20, true); lh.setUint16(6, 0x0800, true);
+    lh.setUint16(8, 0, true); lh.setUint16(10, time, true); lh.setUint16(12, date, true);
+    lh.setUint32(14, crc, true); lh.setUint32(18, size, true); lh.setUint32(22, size, true);
+    lh.setUint16(26, name.length, true); lh.setUint16(28, 0, true);
+    parts.push(lh.buffer, name, f.bytes);
+    const ch = new DataView(new ArrayBuffer(46));       // 목록 항목
+    ch.setUint32(0, 0x02014b50, true); ch.setUint16(4, 20, true); ch.setUint16(6, 20, true);
+    ch.setUint16(8, 0x0800, true); ch.setUint16(10, 0, true); ch.setUint16(12, time, true); ch.setUint16(14, date, true);
+    ch.setUint32(16, crc, true); ch.setUint32(20, size, true); ch.setUint32(24, size, true);
+    ch.setUint16(28, name.length, true); ch.setUint32(42, offset, true);
+    central.push(ch.buffer, name);
+    offset += 30 + name.length + size;
+  }
+  const centralSize = central.reduce((s, p) => s + p.byteLength, 0);
+  const end = new DataView(new ArrayBuffer(22));        // 끝 표시
+  end.setUint32(0, 0x06054b50, true);
+  end.setUint16(8, files.length, true); end.setUint16(10, files.length, true);
+  end.setUint32(12, centralSize, true); end.setUint32(16, offset, true);
+  return new Blob([...parts, ...central, end.buffer], { type: 'application/zip' });
+}
+
+// 전체 저장: 모든 카드를 그린 뒤 ZIP 파일 하나로 한 번에 내려받는다
+async function saveAll() {
+  if (saving || !canSave()) return;
+  const total = previewCards.length;
+  setSaving(true, `그리는 중 0/${total}`);
+  try {
+    await waitForFonts();
+    const files = [];
+    for (let i = 0; i < total; i++) {
+      $('save-status').textContent = `그리는 중 ${i + 1}/${total}`;
+      const blob = await canvasToBlob(await renderCard(i));
+      files.push({ name: fileName(i), bytes: new Uint8Array(await blob.arrayBuffer()) });
+    }
+    downloadBlob(makeZip(files), ZIP_NAME);
+    setSaving(false, `${ZIP_NAME} (${total}장) 저장했어요`);
+  } catch (e) {
+    setSaving(false, '');
+    alert('저장하는 중에 문제가 생겼어요. 다시 시도해 주세요.');
+  }
+}
+$('btn-save-all').onclick = saveAll;
+
+/* ═════════ 블로그 연결 ═════════
+   블로그 앱(ace-blog-studio)이 '주소#data=Base64(UTF-8 JSON)'으로 보낸다.
+   { type, title, subtitle, date, author,
+     cards: [{ heading, points: [문장…최대 3], number, table? }],  // table: 그 소제목의 첫 표 [[머리글…], [값…], …]
+     source, hashtags }
+   숫자(number)는 받은 글자 그대로 쓴다. 바꾸거나 새로 만들지 않는다.
+   형식이 틀리거나 없으면 조용히 무시하고 빈 입력칸으로 시작한다. */
+const BLOG_SAMPLE_MARK = /\s*\(예시·가상 데이터\)\s*$/;   // 블로그가 예시 글일 때 부제 끝에 붙이는 표시
+
+// 주소에서 데이터 부분을 지워 주소창을 깔끔하게
+function clearHash() {
+  try { history.replaceState(null, '', location.pathname + location.search); }
+  catch (e) { try { location.hash = ''; } catch (e2) { /* 그냥 둔다 */ } }
+}
+
+function decodeBlogHash(hash) {
+  const m = /^#data=(.+)$/s.exec(hash || '');
+  if (!m) return null;
+  const b64 = decodeURIComponent(m[1]).replace(/ /g, '+');
+  const bin = atob(b64);
+  const bytes = Uint8Array.from(bin, (c) => c.charCodeAt(0));
+  return JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes));
+}
+
+/* ─── 블로그 → 카드 길이 맞추기 ───
+   AI 없이 규칙으로만 줄인다. 뜻이 바뀔 수 있는 자르기(… 붙여 끊기)는 하지 않고,
+   안전하게 줄일 수 없으면 원문 그대로 두고 경고로 알린다. 숫자는 절대 바꾸지 않는다. */
+
+// 핵심 카드 고르기: 요약·장점·단점·추천 대상·가격 같은 소제목을 먼저, 소개·마무리 같은 소제목은 뒤로
+const CARD_PICK_MIN = 3, CARD_PICK_MAX = 5;
+const HEAD_GOOD = /요약|핵심|한눈에|장점|좋은\s*점|단점|아쉬운|주의|체크|확인할|이런\s*분|추천|맞는\s*분|시세|가격|매매가|실거래|전세|월세|보증금|조건|위치|교통|입지/;
+const HEAD_WEAK = /소개|인사|들어가며|시작하며|마무리|맺음|마치며|끝으로|문의|연락|오시는\s*길|중개사무소|참고|출처|함께\s*읽|해시태그|정보\s*기준일/;
+function pickBlogCards(cards) {
+  const scored = cards.map((c, i) => ({
+    c, i,
+    score: (HEAD_GOOD.test(c.heading) ? 2 : 0) - (HEAD_WEAK.test(c.heading) ? 3 : 0) + (c.number || c.tableVals.length ? 1 : 0),
+  }));
+  let picked = [...scored].sort((a, b) => b.score - a.score || a.i - b.i).slice(0, CARD_PICK_MAX);
+  // 점수가 낮은(소개·마무리 등) 카드는 3장이 남을 때까지 뺀다
+  while (picked.length > CARD_PICK_MIN && picked[picked.length - 1].score < 0) picked.pop();
+  return picked.sort((a, b) => a.i - b.i).map((x) => x.c);   // 블로그 순서대로
+}
+
+// 글자 수: 공백은 세지 않는다
+const textLen = (s) => [...String(s || '').replace(/\s/g, '')].length;
+const fitsIn = (s, n) => textLen(s) <= n;
+
+// 소제목이 길면 대표 이름으로 (뜻이 같은 짧은 이름)
+const HEAD_LABELS = [
+  [/장단점/, '장단점'],
+  [/단점|아쉬운|주의/, '단점·주의사항'],
+  [/장점|좋은\s*점/, '장점'],
+  [/이런\s*분|추천|맞는\s*분/, '이런 분께 맞습니다'],
+  [/요약|한눈에/, '핵심 요약'],
+  [/체크|확인할/, '체크 포인트'],
+  [/시세|가격|매매가|실거래|전세가|월세|보증금/, '시세·가격'],
+  [/위치|교통|입지/, '위치·교통'],
+];
+function shortenHeading(h) {
+  let s = h.replace(/^\s*(?:■|▶|●|◆|[①-⑳]|\d+\s*[.)]|-)\s*/, '').replace(/\s+/g, ' ').trim();
+  if (fitsIn(s, LIMIT.sub)) return s;
+  s = s.replace(/\s*\([^)\d]*\)/g, '').trim();            // 숫자 없는 괄호 설명은 뺀다
+  if (fitsIn(s, LIMIT.sub)) return s;
+  const label = HEAD_LABELS.find(([re]) => re.test(s));
+  if (label) return label[1];
+  const part = s.split(/\s*[,:·|–—?]\s*/).find((x) => textLen(x) >= 2 && fitsIn(x, LIMIT.sub));
+  return part || s;                                        // 못 줄이면 그대로 (경고로 알림)
+}
+
+// 설명 문장을 개조식으로 짧게. 끝말만 바꾸고 숫자·단어는 그대로 둔다.
+const FILLER_RE = /(^|\s)(?:정말|아주|매우|꽤|무척|굉장히|또한|그리고|무엇보다)(?=\s)/g;
+const ENDINGS = [
+  [/(다|라)고\s*(?:함|해요|합니다|하네요|하더라고요|들었어요)$/, '$1'],   // 전하는 말투: '해가 잘 든다고 함' → '해가 잘 든다'
+  [/\s*수\s*있(?:어요|습니다|답니다|다)$/, ' 수 있음'],
+  [/\s*수\s*없(?:어요|습니다|답니다|다)$/, ' 수 없음'],
+  [/불가(?:능)?(?:해요|합니다|하다)$/, '불가'],
+  [/가능(?:해요|합니다|하다)$/, '가능'],
+  [/있(?:어요|습니다|답니다)$/, '있음'],
+  [/없(?:어요|습니다|답니다)$/, '없음'],
+  [/(?:됐어요|되었어요|됐습니다|되었습니다)$/, '됨'],
+  [/(?:돼요|됩니다)$/, '됨'],
+  [/졌(?:어요|습니다)$/, '짐'],
+  [/올랐(?:어요|습니다)$/, '오름'],
+  [/내렸(?:어요|습니다)$/, '내림'],
+  [/했(?:어요|습니다)$/, '함'],
+  [/하세요$/, '하기'],
+  [/(?:해요|합니다)$/, '함'],
+  [/좋(?:아요|습니다)$/, '좋음'],
+  [/많(?:아요|습니다)$/, '많음'],
+  [/적(?:어요|습니다)$/, '적음'],
+  [/넓(?:어요|습니다)$/, '넓음'],
+  [/좁(?:아요|습니다)$/, '좁음'],
+  [/높(?:아요|습니다)$/, '높음'],
+  [/낮(?:아요|습니다)$/, '낮음'],
+  [/가까워요$|가깝습니다$/, '가까움'],
+  [/(?:이에요|예요|입니다|이랍니다)$/, ''],
+];
+// 끝말 정리(개조식): 끝 문장부호를 빼고 '~해요/~다고 함' 같은 끝말을 짧게. 숫자·단어는 그대로.
+function tidyEnding(p) {
+  let s = String(p || '').replace(/\*\*/g, '').replace(/\s+/g, ' ').trim().replace(/[.!…~]+$/, '').trim();
+  const e = ENDINGS.find(([re]) => re.test(s));
+  if (e) s = s.replace(e[0], e[1]).trim();
+  return s;
+}
+// 20자를 넘으면 덜 중요한 것부터 뺀다: 출처·숫자 없는 괄호 → 꾸밈말. 숫자가 든 괄호는 그대로.
+function trimLine(s) {
+  const steps = [
+    (x) => x.replace(/\s*\((?:출처|참고)[^)]*\)/g, '').replace(/\s*\([^)\d]*\)/g, ''),
+    (x) => x.replace(FILLER_RE, '$1'),
+  ];
+  for (const step of steps) {
+    if (fitsIn(s, LIMIT.desc)) break;
+    s = step(s).replace(/\s+/g, ' ').trim();
+  }
+  return s;
+}
+
+// 문장을 구절로 나눈다. 쉼표·문장 끝(. ! ?)·띄어 쓴 가운뎃점( · ) 뒤, 그리고 '남향이라 / 건물이고'처럼
+// 이름말 뒤의 '이라·이라서·이고·이며'에서만 끊는다. 괄호 안, 숫자 안(1,000 · 19.83), 단어 중간에서는 끊지 않는다.
+const CLAUSE_JOIN = /(?:이라서|이라|이고|이며)$/;
+function splitPhrases(s) {
+  const out = [];
+  let cur = '', depth = 0;
+  const push = () => { const t = tidyEnding(cur.replace(/\s*[,，·]\s*$/, '')); if (t) out.push(t); cur = ''; };
+  const words = s.split(' ');
+  words.forEach((w, wi) => {
+    for (const ch of w) { if ('([{'.includes(ch)) depth++; else if (')]}'.includes(ch)) depth = Math.max(0, depth - 1); }
+    cur += (cur ? ' ' : '') + w;
+    if (depth || wi === words.length - 1) return;
+    const prev = w.slice(-2, -1), last = w.slice(-1);
+    if (/[,，.!?]/.test(last) || w === '·') { push(); return; }
+    if (CLAUSE_JOIN.test(w) && textLen(w.replace(CLAUSE_JOIN, '')) >= 1 && !/\d$/.test(prev)) {
+      cur = cur.replace(CLAUSE_JOIN, ''); push();
+    }
+  });
+  push();
+  return out;
+}
+
+// 설명 문장들 → 짧은 줄 (한 줄 20자 안팎, 최대 max개).
+// 20자 안에 드는 문장은 그대로 한 줄. 긴 문장은 구절로 나누고, 이어 붙여도 20자 안이면 쉼표로 붙인다.
+// 그래도 긴 구절은 그대로 두고 경고로 알린다(… 로 자르지 않는다).
+function phraseLines(points, max, skip = []) {
+  const lines = [];
+  for (const p of points) {
+    const whole = tidyEnding(p);
+    let parts = fitsIn(whole, LIMIT.desc) ? [whole] : splitPhrases(p.replace(/\*\*/g, '').replace(/\s+/g, ' ').trim());
+    parts = parts.filter((x) => x && !skip.includes(x));
+    const merged = [];
+    parts.forEach((x) => {
+      const last = merged[merged.length - 1];
+      if (last && fitsIn(`${last}, ${x}`, LIMIT.desc)) merged[merged.length - 1] = `${last}, ${x}`;
+      else merged.push(x);
+    });
+    merged.map(trimLine).forEach((x) => { if (x && lines.length < max && !lines.includes(x)) lines.push(x); });
+    if (lines.length >= max) break;
+  }
+  return lines;
+}
+const toLines = (arr) => [0, 1, 2].map((k) => arr[k] || '');
+
+// 큰 숫자: 블로그 글에 실제로 있는 숫자만, 단위까지 그대로 쓴다
+const NUM_EXPR = String.raw`[+\-−]?\d[\d,.]*\s*(?:억(?:\s*\d[\d,]*\s*만\s*원?)?|만\s*원|원|%|건|㎡|평|층|개월|년|분|세대)`;
+const DEPOSIT_RE = new RegExp(String.raw`보증금\s*(?:은|는|이|:)?\s*(${NUM_EXPR})`);
+const RENT_RE = new RegExp(String.raw`월세\s*(?:는|가|:)?\s*(${NUM_EXPR})`);
+function pickKey(card) {
+  const text = [card.heading, ...card.points].join(' ');
+  const dep = DEPOSIT_RE.exec(text), rent = RENT_RE.exec(text);
+  if (dep && rent) return `보증금 ${dep[1].trim()} / 월세 ${rent[1].trim()}`;
+  return card.number || '';                                // 블로그가 고른 대표 숫자 그대로
+}
+
+// 큰 숫자가 8자를 넘으면 한 줄에 들게 줄인다. 숫자는 그대로 두고 덧붙은 말만 뺀다. 못 줄이면 그대로(경고로 알림).
+function shortenKey(k) {
+  let s = String(k || '').replace(/\s+/g, ' ').trim();
+  const steps = [
+    (x) => x.replace(/\s*\([^)]*\)/g, ''),                         // 괄호 설명: 19.83㎡ (약 6.0평) → 19.83㎡
+    (x) => x.replace(/\s*\/\s*총\s*\d+\s*층/g, ''),                 // 7층 / 총 15층 → 7층
+    (x) => (/\/|·|,\s/.test(x) ? x : x.replace(/^(?:[^\d\s]+\s+)+(?=\S*\d)/, '')),  // 값이 하나면 앞 이름 빼기: 전용면적 19.83㎡ → 19.83㎡
+  ];
+  for (const step of steps) {
+    if (fitsIn(s, LIMIT.key)) break;
+    s = step(s).replace(/\s+/g, ' ').trim();
+  }
+  return s;
+}
+
+// 설명의 첫 숫자 (단위까지, 숫자는 그대로). 7억 4,400만원처럼 띄어 쓴 숫자도 한 덩어리로.
+const KEY_JOSA = /(?:이면|이고|이며|이라|에게|에서|으로|부터|까지|처럼|보다|이에요|예요|이다|에|로|은|는|이|가|을|를|의|와|과|도|만)$/;
+const KEY_JOINS = /(?:이나|이고|이며|이라서|이라|라서|해서|하고|지만|는데)$/;
+function firstNumber(text) {
+  const d = String(text).search(/\d/);
+  if (d < 0) return '';
+  const start = d > 0 && /[+\-−]/.test(text[d - 1]) ? d - 1 : d;   // 부호(−3%)는 같이
+  const n = new RegExp('^' + NUM_EXPR).exec(text.slice(start));
+  if (n) return n[0].trim();
+  const tokenStart = text.lastIndexOf(' ', d) + 1;
+  const token = text.slice(tokenStart).split(' ')[0].replace(/^[(\[]+|[)\].,!?]+$/g, '');
+  return dropJosa(token.replace(KEY_JOINS, ''));
+}
+// 끝 조사 빼기. 빼고 나서 마지막 낱말이 한 글자가 되면(불가 → 불) 빼지 않는다.
+function dropJosa(s) {
+  const t = s.replace(KEY_JOSA, '');
+  return textLen(t.split(' ').pop()) >= 2 ? t : s;
+}
+
+// 표에서 대표 값 고르기: 가격 → 면적 → 층 순서로 2개. 값은 표에 있는 그대로.
+const TABLE_KINDS = [
+  ['price', /가격|금액|매매가|매매|전세|월세|보증금|시세|거래가|분양가/],
+  ['area', /면적|평형|평수|㎡|크기/],
+  ['floor', /층(?!간)/],
+];
+const tableKind = (label) => (TABLE_KINDS.find(([, re]) => re.test(String(label || '').replace(/\s/g, ''))) || [''])[0];
+function pickTableValues(table) {
+  if (!Array.isArray(table) || table.length < 2) return [];
+  const found = {};
+  const add = (label, value) => {
+    const kind = tableKind(label);
+    value = String(value || '').trim();
+    if (!kind || found[kind] || !/\d/.test(value) || findSlots(value).length) return;
+    // 머리글에 단위가 있으면(거래금액(만원) | 92,500) 값 뒤에 그 단위를 붙인다. 숫자는 그대로.
+    const unit = /\(([^)\d]+)\)\s*$/.exec(label);
+    if (unit && /^[\d,.\s]+$/.test(value)) { value += unit[1].trim(); label = label.slice(0, unit.index); }
+    found[kind] = { kind, label: String(label).trim(), value };
+  };
+  table.slice(1).forEach((r) => add(r[0], r[1]));          // '항목 | 내용' 표: 첫 칸이 이름
+  (table[0] || []).forEach((h, j) => add(h, table[1][j])); // 머리글이 이름인 표: 첫 줄의 값
+  return TABLE_KINDS.map(([k]) => found[k]).filter(Boolean).slice(0, 2);
+}
+// 표 값 한 줄: '전용면적 19.83㎡ (약 6.0평)'. 이름이 값에 이미 드러나면(가격·층) 값만.
+function tableLine(v) {
+  const plain = v.kind === 'floor' || /^(?:가격|금액)$/.test(v.label) || /^(?:보증금|월세|전세|매매)/.test(v.value);
+  return plain ? v.value : `${v.label} ${v.value}`;
+}
+
+// FAQ: 'Q. 질문?' 'A. 답' 형식. 첫 질문과 그 답을 꺼낸다. 없으면 null.
+const FAQ_HEAD = /FAQ|자주\s*묻는|Q\s*&\s*A|질문과\s*답/i;
+const Q_RE = /^\s*Q\s*[.:)]\s*/i, A_RE = /\s*\bA\s*[.:)]\s*/i;
+function parseFaq(card) {
+  const pts = card.points;
+  let qi = pts.findIndex((p) => Q_RE.test(p));
+  if (qi < 0 && FAQ_HEAD.test(card.heading)) qi = pts.findIndex((p) => /[?？]\s*$/.test(p));
+  if (qi < 0) return null;
+  const [qPart, ...aParts] = pts[qi].replace(Q_RE, '').split(A_RE);   // 'Q. … A. …'가 한 줄에 같이 있을 때
+  const answers = aParts.filter(Boolean);
+  for (let k = qi + 1; k < pts.length && !Q_RE.test(pts[k]); k++) answers.push(pts[k].replace(/^\s*A\s*[.:)]\s*/i, ''));
+  const question = qPart.replace(/\*\*/g, '').trim();
+  return question ? { question, answers } : null;
+}
+
+// 블로그 소제목 하나 → 카드 하나 { sub, key, lines }
+//  · 숫자 카드: 큰 숫자 + 그 숫자가 무엇인지 한 줄(sub) + 짧은 줄 최대 3개
+//  · 제목 카드: 소제목(또는 FAQ 질문)이 큰 제목 + 짧은 줄 최대 2개
+function fitBlogCard(card) {
+  const faq = parseFaq(card);
+  if (faq) return { ...newContent(), sub: faq.question, lines: toLines(phraseLines(faq.answers, MAX_LINES.title)) };
+
+  const vals = card.tableVals;
+  if (vals.length) {
+    // 표 소제목: 표의 앞 줄을 옮기지 않고 대표 값으로. 8자 안에 드는 값을 큰 숫자로, 다른 값은 짧은 줄로.
+    const at = Math.max(0, vals.findIndex((v) => fitsIn(shortenKey(v.value), LIMIT.key)));
+    const main = vals[at];
+    const rowTexts = card.table.slice(1).map((r) => r.filter(Boolean).join(' · '));
+    const rest = card.points.filter((p) => !rowTexts.includes(p));   // 표가 아닌 문장
+    const others = vals.filter((_, i) => i !== at).map(tableLine);
+    const lines = [...others, ...phraseLines(rest, MAX_LINES.number - others.length)];
+    const key = shortenKey(main.value);
+    if (NUMBER_KEY_RE.test(key)) return { ...newContent(), sub: main.label.replace(/\s*\([^)]*\)\s*$/, ''), key, lines: toLines(lines) };
+  }
+
+  const heading = shortenHeading(card.heading);
+  const all = card.points.map((p) => p.replace(/\*\*/g, '').replace(/\s+/g, ' ').trim());
+  const key = shortenKey(pickKey(card) || firstNumber(all.join(' ')));
+  if (!NUMBER_KEY_RE.test(key)) {
+    return { ...newContent(), sub: heading, lines: toLines(phraseLines(card.points, MAX_LINES.title)) };
+  }
+  // 숫자 카드: 숫자가 들어 있는 구절을 '무슨 숫자인지' 줄로 (20자 안일 때). 없으면 소제목.
+  const digits = key.match(/\d[\d,.]*/g) || [];
+  const flat = (x) => x.replace(/\s/g, '');
+  const inKey = (x) => flat(key).includes(flat(x));          // 큰 숫자를 되풀이할 뿐인 구절(보증금 1,000만원)
+  const phrases = all.flatMap((p) => splitPhrases(p));
+  const label = phrases.find((x) => !inKey(x) && digits.some((d) => x.includes(d)) && fitsIn(x, LIMIT.desc)) || '';
+  const skip = [label, ...phrases.filter(inKey)].filter(Boolean);
+  const lines = phraseLines(card.points, MAX_LINES.number, skip);
+  return { ...newContent(), sub: label || heading, key, lines: toLines(lines) };
+}
+
+// 받은 데이터를 앱 입력 형태로 바꾼다. 쓸 내용이 없으면 null.
+function blogToState(json) {
+  if (!json || typeof json !== 'object' || Array.isArray(json)) return null;
+  const str = (v) => (typeof v === 'string' ? v.trim() : typeof v === 'number' ? String(v) : '');
+  let subtitle = str(json.subtitle);
+  const isSample = BLOG_SAMPLE_MARK.test(subtitle);
+  if (isSample) subtitle = subtitle.replace(BLOG_SAMPLE_MARK, '');
+  const cards = (Array.isArray(json.cards) ? json.cards.filter((c) => c && typeof c === 'object') : [])
+    .map((c) => ({
+      heading: str(c.heading),
+      number: str(c.number),
+      points: Array.isArray(c.points) ? c.points.map(str).filter(Boolean) : [],
+      table: Array.isArray(c.table) ? c.table.filter(Array.isArray).map((r) => r.map(str)) : [],
+    }))
+    .filter((c) => c.heading || c.points.length || c.number)
+    .map((c) => ({ ...c, tableVals: pickTableValues(c.table) }));
+  const contents = pickBlogCards(cards).map(fitBlogCard);   // 핵심 3~5장만, 카드 길이에 맞춰 줄임
+  const title = str(json.title);
+  if (!title && !subtitle && !contents.length) return null;
+  while (contents.length < MIN_CONTENT) contents.push(newContent());
+  return {
+    isExample: isSample,
+    cover: { title, subtitle },
+    contents,
+    closing: [...DEFAULT_CLOSING],
+  };
+}
+
+// 주소에 블로그 데이터가 있으면 읽어서 state로. 실패해도 오류 없이 null.
+function takeBlogData() {
+  if (!/^#data=/.test(location.hash || '')) return null;
+  let next = null;
+  try { next = blogToState(decodeBlogHash(location.hash)); } catch (e) { next = null; }
+  clearHash();
+  return next;
+}
+
+function showImportNote(on) { $('import-note').hidden = !on; }
+
+// 이미 열린 탭에 새 블로그 주소가 들어와도 받는다
+window.addEventListener('hashchange', () => {
+  if (!/^#data=/.test(location.hash || '')) return;
+  const keep = hasInput();
+  const next = takeBlogData();
+  if (!next) return;
+  if (keep && !confirm('블로그에서 새 내용이 왔어요. 지금 입력한 내용을 바꿀까요?')) return;
+  state = next; fillStaticFields(); changed(true); showImportNote(true);
+});
+
+/* ═════════ 시작 ═════════ */
+document.title = APP_NAME;
+$('app-name').textContent = APP_NAME;
+if (BLOG_URL) { $('blog-link').href = BLOG_URL; $('blog-link').hidden = false; }
+const fromBlog = takeBlogData();
+if (fromBlog) { state = fromBlog; showImportNote(true); }
+fillStaticFields();
+renderLogoPanel();
+refreshWhiteLogo();
+renderContentEditor();
+renderPreview();
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { fitScale(); layoutAll(); renderWarnings(); });
+</script>
+</body>
+</html>
